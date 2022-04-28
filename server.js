@@ -9,7 +9,7 @@ const movieData = require ('./Movie_adta/data.json')
 const app = express();
 const port = 3000;
 
-app.get('/',handleData);
+app.get("/",handleData);
 
 function handleData(req,res){
     let result = [];
@@ -18,13 +18,13 @@ function handleData(req,res){
     res.josn(result);
 } 
 
-app.get('/favarite', handleFavarite);
+app.get("/favarite", handleFavarite);
 
 function handleFavarite(req,res) {
 
     res.send("Welcome to Favarite Page");
 } 
-app.get('/error', (req, res) => res,send(error()));
+app.get("/error", (req, res) => res,send(error()));
 
 app.use(function (err, req, res, text) {
     console.log(err.stack);
