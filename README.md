@@ -1,22 +1,18 @@
-# Movies-Library
-Requirements:
-Draw the web request response cycle for the task at hand
+Movies-Library
+Movies-Library - 1.0.0
+Author Name: Ahmad Amaireh
 
-Set up your server repository:
+WRRC
 
-Create a repository called Movies-Library on GitHub
-Initialize your project by running the following command "npm init -y"
-Create a new branch called Task11
-Create basic file structure (server.js, .gitignore, .eslintrc.json )
-Install the required packages for this task: npm install express cors
 
-Build the following routes using the GET request:
 
-Home Page Endpoint: /
+Overview
+bulding server from zero
 
-Create a route with a method of get and a path of /. The callback should use the provided JSON data.
-Create a constructor function to ensure your data follow the same format.
+Getting Started
+1-adding new movie in the body of query you must add three key :id,title,overview which is varchar(225) in the url of query you must add /addMovie
 
-Handle errors
-Create a function to handle the server error (status 500)
-Create a function to handle "page not found error" (status 404)
+2-getting data from movie database at table movieInfo in the url of query you must add /getMovie
+
+Project Features
+1-add home page handler 2-add fav page handler 3-add search handler 4-add trendeng handler 5-add add movie handler 6-add get movie handler
