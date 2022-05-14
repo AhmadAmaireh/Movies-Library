@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "axios": "^0.27.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.1",
+    "nodemon": "^2.0.16",
+    "pg": "^8.7.3"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "movies-library",
+  "description": "# Movies-Library Task 14",
+  "version": "1.0.0",
+  "main": "server.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AhmadAmaireh/Movies-Library-1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AhmadAmaireh/Movies-Library-1.git/issues"
+  },
+  "homepage": "https://github.com/AhmadAmaireh/Movies-Library-1.git#readme"
+}
