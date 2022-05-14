@@ -1,152 +1,173 @@
-'use strict';
-//2f7c43dfa0698bbdddc7090cdc618d03
-const url = "postgres://samah:1234@localhost:5432/movie"
-const recData = require("./data.json");
+"use strict";
+
 const express = require("express");
-const bodyParser = require('body-parser');
+const app = express();
+const axios = require("axios").default;
+
+const { json } = require("express/lib/response");
+app.use(express.json());
+
 const cors = require("cors");
-const axios = require('axios').default;
-//require('dotenv').config()
+app.use(cors());
+
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({extended: false}));
+
+const movieData = require("./Movie Data/data.json");
+
+require('dotenv').config();
+const apiKey = process.env.API_KEY;
+const apiKey2 = "a70154502a88b5d3146c6d6a216a09ea";
 const port = 3000;
-const { Client } = require('pg')
-const client = new Client(url)
+const databaseURL = "postgres://Ahmad:Amayreh@localhost:5432/movies";
 
-const app1 = express();
-app1.use(cors());
+const { Client } = require('pg');
+const client = new Client(databaseURL);
 
-// const apiKey = process.env.API_KEY;
+// get .....
+app.get("/", handleServer);
+app.get("/favorite", handleFavorite);
+app.get("/error", (req, res)=>res.send(error()));
+app.get("/trending", handleTrend);
+app.get("/search", handleSearch);
+// TASK 13 ----->
+//dbs:
+app.post("/addMovie", handleAddMovies);
+app.get("/getMovies", handleGetMovies);
 
-app1.use(bodyParser.urlencoded({ extended: false }))
 
-app1.use(bodyParser.json())
 
-app1.post("/addMovie", handleAdd);
-
-function handleAdd(req,res)
-{    console.log("insert new");                              
-  const { id, title, overview } = req.body;
-  
-    let sql = 'INSERT INTO moviesInfo(id, title, overview ) VALUES($1, $2, $3) RETURNING *;' // sql query
-    let values = [id, title, overview];
-    client.query(sql, values).then((result) => {
-        console.log(result.rows);
-        return res.status(201).json(result.rows);
-    }).catch()
-
+// --> functions
+function handleServer(req, res){
+    let result = [];
+    let title = movieData.title;
+    let path = movieData.poster_path;
+    let overview = movieData.overview;
+    let newMovie = new Movie(title, path, overview);
+    result.push(newMovie);
+    // json.send(result);
+    res.send(result);
 }
 
-app1.get("/getMovies", handleGet);
-function handleGet(req, res) {
-
-    let sql = 'SELECT * from moviesInfo;'
-    client.query(sql).then((result) => {
-        console.log(result);
-        res.json(result.rows);
-    }).catch((err) => {
-      console.log("err for get")
-       handleErr500(err, req, res);
-    });
+function handleFavorite(req, res){
+    res.send("Welcome to Favorite Page");
 }
 
-function Data(title, path, overview) {
-  this.title = title;
-  this.path = path;
-  this.overview = overview;
-}
+// Handling 404
+app.get('*', function(req, res){
+    let msg = {
+        "status": 404,
+        "responseText": "Sorry, something went wrong Web Page Not Found , Try Again"
+        }
+    res.send(msg);
+  });
 
+// Handling 500
+app.use(function(error, req, res, next) {
+    let msg = {
+        "status": 500,
+        "responseText": "Sorry, something went wrong"
+    }
+    console.log(err.stack)
+    res.type("text/plain")
+    res.status(500)
+    res.send(msg)
+});
 
-
-app1.get("/", handleHome);
-function handleHome(req, res) {
-  let result = new Data(recData.title, recData.poster_path, recData.overview);
-  res.json(result);
-
-}
-
-function Movie(id, title, release_date, poster_path, overview) {
-  this.id = id;
-  this.title = title;
-  this.release_date = release_date;
-  this.poster_path = poster_path;
-  this.overview = overview;
-}
-//trending
-app1.get("/trending", handleTrend);
-function handleTrend(req, res) {
-   const url = `http://api.themoviedb.org/3/trending/all/week?api_key=37ddc7081e348bf246a42f3be2b3dfd0&language=en-US?api_key=2f7c43dfa0698bbdddc7090cdc618d03`;
-  axios.get(url).then(result => {
-  // console.log("array"+result.data);
-    let moveis = result.data.results.map(result => {
-
-      return new Movie(result.id, result.title, result.release_date, result.poster_path, result.overview);
-
-    })
-    res.json(moveis);
-  }).catch(error => { res.send("Inside catch") });
-}
-
-//search
-  app1.get("/search",searchHandling);
-  function searchHandling(req,res)
-  {
-    let movieName=req.query.name;
-    const url = `http://api.themoviedb.org/3/trending/all/week?api_key=37ddc7081e348bf246a42f3be2b3dfd0&language=en-US?api_key=2f7c43dfa0698bbdddc7090cdc618d03`;
+// Function For Task 12.....
+function handleTrend(req, res){
+    let url = `https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}&language=en-US`;
     axios.get(url)
-            .then(result => {
-               console.log("inside then search");
-                res.json(result.data.results)
-            })
-            .catch();
-        
-
-
-  }
-
-/**
- * // function handleSearch(req, res) {
-//     // console.log(req.query);
-//     let recipeName = req.query.name; // I chose to call it name
-//     let url = `https://api.spoonacular.com/recipes/complexSearch?query=${recipeName}&apiKey=${apiKey}`
-//     axios.get(url)
-//         .then(result => {
-//             // console.log(result.data.results);
-//             res.json(result.data.results)
-//         })
-//         .catch();
-//     // waiting to get data from 3rd API
-//     // res.send("Searching for recipes");
-// }
- */
-
-
-
-app1.get("/fav", handleFav);
-function handleFav(req, res) {
-  res.send("Welcome to Favorite Page");
-}
-app1.use(handleErr500);
-function handleErr500(req, res) {
-  let error = {
-    "status": 500,
-    "responseText": "Sorry, something went wrong"
-  }
-
-  res.status(500).json(error);
-
+         .then(result =>{
+             let moviesData = result.data.results;
+             let trendMovies = moviesData.map(data =>{
+                 return new Trend(data.id, data.title, data.release_date, data.poster_path, data.overview);
+             })
+            res.json(trendMovies);
+         })
+         .catch(error=>{
+             console.log(error);
+             res.send("Inside Catch");
+         })
 }
 
-app1.get("*", handleErr404);
-function handleErr404(req, res) {
-  let error = {
-    "status": 404,
-    "responseText": "page not found error"
-  }
-  res.status(404).json(error);
-
+function handleSearch(req, res){
+    let movieName = req.query.name;
+    let url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&language=en-US&query=${movieName}&page=2`;
+    axios.get(url)
+         .then(result =>{
+             let movie = result.data.results;
+             let searchMovies = movie.map(data =>{
+                 return new Search(data.id, data.title, data.overview, data.popularity, data.vote_average, data.vote_count);
+             })
+             res.json(searchMovies);
+         })
+         .catch(error =>{
+            console.log(error);
+            res.send("Inside Catch");
+         })
 }
+
+// TASK 13 ----->
+//dbs:
+
+function handleAddMovies(req ,res){
+    const name = req.body.name;
+    const myComments = req.body.myComments;
+
+    let sql = `INSERT INTO favMovies (name, myComments) VALUES ($1, $2) RETURNING *`;
+    let values = [name, myComments];
+
+    client.query(sql, values)
+          .then(result=>{
+              console.log(result.rows);
+              res.status(201).json(result.rows[0]);
+          })
+          .catch(error=>{
+              console.log(error);
+          });
+}
+
+function handleGetMovies(req, res){
+    let sql = `SELECT * FROM favMovies`;
+    client.query(sql)
+          .then(result=>{
+            console.log(result.rows);
+            res.status(201).json(result.rows);
+          })
+          .catch(error=>{
+              console.log(error);
+          });
+}
+
 client.connect().then(() => {
-
-    app1.listen(port, () => {
-        console.log(`Server is listening ${port}`);
+    app.listen(port, function(){
+        console.log(`Server on port ${port}`);
     });
 })
+
+// Constructors  ...
+function Movie(title, path, overview){
+    this.title = title;
+    this.path = path;
+    this.overview = overview;
+}
+
+// Constructor  For Trend Movies ...
+function Trend(id, title, releaseDate, posterPath, overview){
+    this.id = id;
+    this.title = title;
+    this.releaseDate = releaseDate;
+    this.posterPath = posterPath;
+    this.overview = overview;
+}
+
+// Constructor  For Search Movies ..
+function Search(id, title, overview, popularity, vote_average, vote_count){
+    this.id = id;
+    this.title = title;
+    this.overview = overview;
+    this.popularity = popularity;
+    this.vote_average = vote_average;
+    this.vote_count = vote_count;
+}
